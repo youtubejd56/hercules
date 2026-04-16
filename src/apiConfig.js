@@ -1,5 +1,5 @@
-// Fill this with your actual Render Backend URL
-const BASE_URL = 'https://hercules-backend.onrender.com'; 
+// Render backend URL
+const BASE_URL = 'https://hercules-backend-a8bu.onrender.com';
 
 export const API_URLS = {
   testimonials: `${BASE_URL}/api/testimonials/`,

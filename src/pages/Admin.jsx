@@ -9,6 +9,7 @@ export default function Admin({ setCurrentPage }) {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
   const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   const [admissions, setAdmissions] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
@@ -52,13 +53,18 @@ export default function Admin({ setCurrentPage }) {
       const response = await fetch(API_URLS.gallery, { method: 'POST', body: formData });
       if (response.ok) {
         setTitle(''); setFile(null);
+        // Reset the file input element visually
+        if (fileInputRef.current) fileInputRef.current.value = '';
         alert('Published to Gallery!');
         // Refresh gallery
         fetch(API_URLS.gallery)
           .then(res => res.ok ? res.json() : [])
           .then(data => setGalleryImages(Array.isArray(data) ? data : []));
-      } else alert('Upload failed.');
-    } catch (error) { console.error(error); }
+      } else {
+        const err = await response.json().catch(() => ({}));
+        alert(`Upload failed: ${err.error || response.statusText}`);
+      }
+    } catch (error) { console.error(error); alert('Network error. Check your connection.'); }
     finally { setUploading(false); }
   };
 
@@ -94,8 +100,11 @@ export default function Admin({ setCurrentPage }) {
         fetch(API_URLS.admissions)
           .then(res => res.ok ? res.json() : [])
           .then(data => setAdmissions(Array.isArray(data) ? data : []));
+      } else {
+        const err = await response.json().catch(() => ({}));
+        alert(`Failed to add member: ${err.error || response.statusText}`);
       }
-    } catch (error) { console.error(error); }
+    } catch (error) { console.error(error); alert('Network error. Check your connection.'); }
     finally { setUploading(false); }
   };
 
@@ -174,7 +183,7 @@ export default function Admin({ setCurrentPage }) {
               <h2 className="text-3xl font-bold mb-6">Upload Image to Gallery</h2>
               <form onSubmit={handleUpload} className="bg-card border border-white/10 p-8 rounded-2xl shadow-2xl">
                 <input type="text" placeholder="Post Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full mb-4 px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white outline-none focus:border-primary transition-all" required />
-                <input type="file" accept="image/*" onChange={e => setFile(e.target.files[0])} className="w-full mb-8 text-gray-400" required />
+                <input type="file" accept="image/*" ref={fileInputRef} onChange={e => setFile(e.target.files[0])} className="w-full mb-8 text-gray-400" required />
                 <button type="submit" disabled={uploading} className="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-red-600 shadow-xl shadow-primary/20"> {uploading ? 'Uploading...' : 'Publish to Gallery'} </button>
               </form>
             </div>
@@ -257,7 +266,7 @@ export default function Admin({ setCurrentPage }) {
                         <td className="p-5">
                           <div className="flex flex-col gap-2">
                             <button onClick={() => handleMarkAsPaid(r.id)} className="px-4 py-2 bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg hover:bg-blue-600 hover:text-white transition-all text-xs font-bold">✅ Mark as Paid</button>
-                            <a href={`https://wa.me/${r.phone?.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(r.name)},%20this%20is%20a%20friendly%20reminder%20from%20*Hercules%20MultiGYM*.%20Your%20monthly%20gym%20fee%20of%20*₹300*%20is%20currently%20*pending*%20(Due:%20${nextDue}).%20Please%20clear%20it%20at%20your%20earliest%20convenience.%20Thank%20you!`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600/20 text-green-500 border border-green-500/30 rounded-lg hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold"><span>💬 Reminder</span></a>
+                            <a href={`https://wa.me/${(() => { const num = r.phone?.replace(/[^0-9]/g, ''); return num?.startsWith('91') ? num : `91${num}`; })()}?text=Hello%20${encodeURIComponent(r.name)},%20this%20is%20a%20friendly%20reminder%20from%20*Hercules%20MultiGYM*.%20Your%20monthly%20gym%20fee%20of%20*₹300*%20is%20currently%20*pending*%20(Due:%20${nextDue}).%20Please%20clear%20it%20at%20your%20earliest%20convenience.%20Thank%20you!`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600/20 text-green-500 border border-green-500/30 rounded-lg hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold"><span>💬 Reminder</span></a>
                           </div>
                         </td>
                       </tr>
