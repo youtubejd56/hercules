@@ -1,6 +1,19 @@
 import React, { useState } from 'react';
 import { API_URLS } from '../apiConfig';
 
+const parseApiError = async (response) => {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    const payload = await response.json().catch(() => ({}));
+    if (typeof payload?.error === 'string') return payload.error;
+    if (typeof payload?.detail === 'string') return payload.detail;
+    if (payload?.error && typeof payload.error === 'object') return JSON.stringify(payload.error);
+    return response.statusText || 'Request failed';
+  }
+  const text = await response.text().catch(() => '');
+  return text?.trim() || response.statusText || 'Request failed';
+};
+
 export default function Admin({ setCurrentPage }) {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [isLogged, setIsLogged] = useState(false);
@@ -20,11 +33,19 @@ export default function Admin({ setCurrentPage }) {
     if (isLogged) {
       fetch(API_URLS.admissions)
         .then(res => res.ok ? res.json() : [])
-        .then(data => setAdmissions(Array.isArray(data) ? data : []));
+        .then(data => setAdmissions(Array.isArray(data) ? data : []))
+        .catch(error => {
+          console.error('Error fetching admissions:', error);
+          setAdmissions([]);
+        });
 
       fetch(API_URLS.gallery)
         .then(res => res.ok ? res.json() : [])
-        .then(data => setGalleryImages(Array.isArray(data) ? data : []));
+        .then(data => setGalleryImages(Array.isArray(data) ? data : []))
+        .catch(error => {
+          console.error('Error fetching gallery:', error);
+          setGalleryImages([]);
+        });
     }
   }, [isLogged]);
 
@@ -62,8 +83,9 @@ export default function Admin({ setCurrentPage }) {
           .then(res => res.ok ? res.json() : [])
           .then(data => setGalleryImages(Array.isArray(data) ? data : []));
       } else {
-        const err = await response.json().catch(() => ({}));
-        alert(`Upload failed: ${err.error || response.statusText}`);
+        const errMsg = await parseApiError(response);
+        console.error('Gallery upload failed', response.status, errMsg);
+        alert(`Upload failed: ${errMsg}`);
       }
     } catch (error) { console.error(error); alert('Network error. Check your connection.'); }
     finally { setUploading(false); }
@@ -109,8 +131,9 @@ export default function Admin({ setCurrentPage }) {
           .then(res => res.ok ? res.json() : [])
           .then(data => setAdmissions(Array.isArray(data) ? data : []));
       } else {
-        const err = await response.json().catch(() => ({}));
-        alert(`Failed to add member: ${err.error || response.statusText}`);
+        const errMsg = await parseApiError(response);
+        console.error('Admission create failed', response.status, errMsg);
+        alert(`Failed to add member: ${errMsg}`);
       }
     } catch (error) { console.error(error); alert('Network error. Check your connection.'); }
     finally { setUploading(false); }
