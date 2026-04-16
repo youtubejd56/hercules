@@ -1,5 +1,5 @@
-// Change back to Render URL later
-const BASE_URL = 'http://127.0.0.1:8000';
+// Render backend URL
+const BASE_URL = 'https://hercules-backend-a8bu.onrender.com';
 
 export const API_URLS = {
   testimonials: `${BASE_URL}/api/testimonials/`,
