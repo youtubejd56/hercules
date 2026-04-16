@@ -15,9 +15,9 @@ export default function Home({ onNavigate }) {
           setTestimonials(data);
         } else {
           setTestimonials([
-            { id: 1, name: 'Vinayak NV', text: "The atmosphere here is incredible. I've gained so much strength, and the community is highly supportive. Best gym in Pala without a doubt.", rating: 5, role: 'Pro Member', duration: '2 Yrs' },
-            { id: 2, name: 'Albin', text: "Joined a few months ago and I'm already seeing crazy results. The trainers really push you to step outside your comfort zone and exceed your limits.", rating: 5, role: 'Elite Member', duration: '6 Mos' },
-            { id: 3, name: 'Athul', text: "State of the art equipment and perfectly maintained. There's never a wait for machines, and the 24/7 access fits right into my busy schedule.", rating: 5, role: 'Basic Member', duration: '1 Yr' }
+            { id: 1, name: 'Vinayak NV', text: "The atmosphere here is incredible. I've gained so much strength, and the community is highly supportive. Best gym in Pala without a doubt.", rating: 5, role: 'Pro Member', duration: '1 Yrs' },
+            { id: 2, name: 'Albin', text: "Joined a few months ago and I'm already seeing crazy results. The trainers really push you to step outside your comfort zone and exceed your limits.", rating: 5, role: 'Elite Member', duration: '10 Yr' },
+            { id: 3, name: 'Athul k shaji', text: "State of the art equipment and perfectly maintained. There's never a wait for machines, and the 24/7 access fits right into my busy schedule.", rating: 5, role: 'Pro Member', duration: '3 Yr' }
           ]);
         }
       })
@@ -37,7 +37,7 @@ export default function Home({ onNavigate }) {
       <section className="relative flex-1 flex items-center justify-center text-center p-8 overflow-hidden z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(30,30,30,0.8)_0%,_rgba(18,18,18,1)_100%)] -z-10" />
 
-        <div className="max-w-4xl mx-auto animate-fade-in-up">
+        <div className="max-w-4xl py-16 mx-auto animate-fade-in-up">
           <h1 className="text-5xl md:text-7xl py-10 font-extrabold uppercase mb-6 leading-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
             Push Your <span className="bg-gradient-to-r from-primary to-red-400 bg-clip-text text-transparent">Limits</span>
           </h1>

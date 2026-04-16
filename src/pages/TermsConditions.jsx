@@ -12,7 +12,7 @@ export default function TermsConditions() {
   return (
     <div className="py-20 px-6 md:px-12 max-w-4xl mx-auto animate-fade-in-up">
       <div className="text-center mb-16 px-4">
-        <h1 className="text-5xl font-extrabold mb-4 uppercase italic tracking-tighter">TERMS & <span className="text-primary italic">CONDITIONS</span></h1>
+        <h1 className="md:text-6xl text-3xl font-extrabold mb-4 uppercase italic tracking-tighter">TERMS & <span className="text-primary italic">CONDITIONS</span></h1>
         <div className="w-24 h-1 bg-primary mx-auto"></div>
         <p className="mt-6 text-gray-400 text-lg">Legal guidelines for your membership.</p>
       </div>
@@ -20,11 +20,11 @@ export default function TermsConditions() {
       <div className="space-y-12">
         {sections.map((s, idx) => (
           <div key={idx} className="border-l-4 border-primary pl-8 py-4">
-             <h3 className="text-2xl font-bold text-white mb-4 uppercase tracking-wider">{s.title}</h3>
-             <p className="text-gray-400 leading-relaxed font-medium">{s.content}</p>
+            <h3 className="text-2xl font-bold text-white mb-4 uppercase tracking-wider">{s.title}</h3>
+            <p className="text-gray-400 leading-relaxed font-medium">{s.content}</p>
           </div>
         ))}
-        
+
         <div className="pt-12 text-center text-gray-600 text-sm italic">
           Last updated: April 16, 2026. Subject to change without prior notice.
         </div>

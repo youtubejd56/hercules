@@ -1,4 +1,5 @@
 import React from 'react';
+import varkey from '../assets/ashane.jpeg';
 
 export default function Trainers() {
   const trainers = [
@@ -9,7 +10,7 @@ export default function Trainers() {
   return (
     <div className="py-20 px-6 md:px-12 max-w-7xl mx-auto animate-fade-in-up">
       <div className="text-center mb-16 px-4">
-        <h1 className="text-5xl font-extrabold mb-4 uppercase italic tracking-tighter">OUR <span className="text-primary italic">TEAM</span></h1>
+        <h1 className="text-5xl font-extrabold mb-4 uppercase italic tracking-tighter">OUR <span className="text-primary italic">TRAINER</span></h1>
         <div className="w-24 h-1 bg-primary mx-auto"></div>
         <p className="mt-6 text-gray-400 text-lg">Work with the most experienced iron masters in Pala.</p>
       </div>
@@ -21,7 +22,7 @@ export default function Trainers() {
           <div className="w-full lg:w-1/3">
             <div className="relative rounded-3xl overflow-hidden border-4 border-primary shadow-2xl skew-y-2 group-hover:skew-y-0 transition-transform duration-500">
               <img
-                src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=600&fit=crop"
+                src={varkey}
                 alt="Head Coach Varkey Devassia"
                 className="w-full h-[450px] object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
               />

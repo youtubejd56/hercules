@@ -5,14 +5,25 @@ export default function Admission() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    photo: null
+    photo: null,
+    feeType: 'registration'
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!/^\d{10}$/.test(formData.phone)) {
+      return alert('Mobile number must be exactly 10 digits.');
+    }
+    if (formData.photo && formData.photo.size > 500 * 1024) {
+      return alert('Profile photo size must be less than 500KB.');
+    }
+    
     const data = new FormData();
     data.append('name', formData.name);
     data.append('phone', formData.phone);
+    // You could also send the fee type if the backend model accepts it.
+    // data.append('fee_type', formData.feeType);
     if (formData.photo) data.append('profile_pic', formData.photo);
 
     try {
@@ -78,15 +89,36 @@ export default function Admission() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Registration Details</label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Registration Type</label>
             <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 p-4 border border-primary/50 bg-primary/5 rounded-xl flex items-center justify-between">
-                <span className="font-bold text-white text-sm">Reg. Fee</span>
-                <span className="text-xl text-primary font-bold">₹800</span>
+              <div 
+                onClick={() => setFormData({ ...formData, feeType: 'registration' })}
+                className={`flex-1 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all ${
+                  formData.feeType === 'registration' 
+                    ? 'border-2 border-primary bg-primary/10 shadow-[0_0_15px_rgba(255,62,62,0.2)]' 
+                    : 'border border-white/10 bg-black/20 hover:bg-white/5'
+                }`}
+              >
+                <div className="flex flex-col">
+                  <span className="font-bold text-white text-sm">New Member</span>
+                  <span className="text-xs text-gray-400">Includes admission</span>
+                </div>
+                <span className={`text-xl font-bold ${formData.feeType === 'registration' ? 'text-primary' : 'text-gray-300'}`}>₹800</span>
               </div>
-              <div className="flex-1 p-4 border border-white/10 bg-black/20 rounded-xl flex items-center justify-between">
-                <span className="font-bold text-white text-sm">Monthly</span>
-                <span className="text-xl text-primary font-bold">₹300</span>
+              
+              <div 
+                onClick={() => setFormData({ ...formData, feeType: 'monthly' })}
+                className={`flex-1 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all ${
+                  formData.feeType === 'monthly' 
+                    ? 'border-2 border-primary bg-primary/10 shadow-[0_0_15px_rgba(255,62,62,0.2)]' 
+                    : 'border border-white/10 bg-black/20 hover:bg-white/5'
+                }`}
+              >
+                <div className="flex flex-col">
+                  <span className="font-bold text-white text-sm">Renewal</span>
+                  <span className="text-xs text-gray-400">Existing member</span>
+                </div>
+                <span className={`text-xl font-bold ${formData.feeType === 'monthly' ? 'text-primary' : 'text-gray-300'}`}>₹300</span>
               </div>
             </div>
           </div>

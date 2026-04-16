@@ -45,6 +45,7 @@ export default function Admin({ setCurrentPage }) {
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file || !title) return alert('Please provide a title and select an image.');
+    if (file.size > 500 * 1024) return alert('Image size must be less than 500KB.');
     setUploading(true);
     const formData = new FormData();
     formData.append('title', title);
@@ -82,6 +83,13 @@ export default function Admin({ setCurrentPage }) {
 
   const handleManualMember = async (e) => {
     e.preventDefault();
+    
+    if (!/^\d{10}$/.test(manualMember.phone)) {
+      return alert('Mobile number must be exactly 10 digits.');
+    }
+    if (manualMember.photo && manualMember.photo.size > 500 * 1024) {
+      return alert('Profile photo size must be less than 500KB.');
+    }
     setUploading(true);
     const formData = new FormData();
     formData.append('name', manualMember.name);
@@ -194,7 +202,7 @@ export default function Admin({ setCurrentPage }) {
                 {galleryImages.map(img => (
                   <div key={img.id} className="bg-card rounded-xl border border-white/5 overflow-hidden group shadow-lg">
                     <div className="h-48 relative overflow-hidden">
-                       <img src={img.image} alt={img.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                       <img src={img.image?.startsWith('res.cloudinary.com') ? `https://${img.image}` : img.image} alt={img.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
                           <button onClick={() => handleDeleteImage(img.id)} className="bg-red-600 text-white p-3 rounded-full hover:bg-red-700 shadow-2xl transform scale-75 group-hover:scale-100 transition-all">🗑️ Delete</button>
                        </div>
@@ -254,7 +262,7 @@ export default function Admin({ setCurrentPage }) {
                     return (
                       <tr key={r.id} className="border-b border-white/5 hover:bg-white/5 group">
                         <td className="p-5">
-                          {r.profile_pic ? <img src={r.profile_pic} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-primary" /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xs text-gray-500">No Pic</div>}
+                          {r.profile_pic ? <img src={r.profile_pic?.startsWith('res.cloudinary.com') ? `https://${r.profile_pic}` : r.profile_pic} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-primary" /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xs text-gray-500">No Pic</div>}
                         </td>
                         <td className="p-5 font-bold">{r.name}</td>
                         <td className="p-5 text-gray-400">{r.phone}</td>
