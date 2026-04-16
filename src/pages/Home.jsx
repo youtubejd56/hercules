@@ -1,10 +1,11 @@
 import React from 'react';
+import { API_URLS } from '../apiConfig';
 
 export default function Home({ onNavigate }) {
   const [testimonials, setTestimonials] = React.useState([]);
 
   React.useEffect(() => {
-    fetch('/api/testimonials/')
+    fetch(API_URLS.testimonials)
       .then(res => {
         if (!res.ok) return res.json().then(err => { throw new Error(err.error || 'Server error') });
         return res.json();

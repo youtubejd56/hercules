@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_URLS } from '../apiConfig';
 
 export default function Admission() {
   const [formData, setFormData] = useState({
@@ -15,7 +16,7 @@ export default function Admission() {
     if (formData.photo) data.append('profile_pic', formData.photo);
 
     try {
-      const response = await fetch('/api/admissions/', {
+      const response = await fetch(API_URLS.admissions, {
         method: 'POST',
         body: data,
       });

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_URLS } from '../apiConfig';
 
 export default function Admin({ setCurrentPage }) {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -16,11 +17,11 @@ export default function Admin({ setCurrentPage }) {
 
   React.useEffect(() => {
     if (isLogged) {
-      fetch('/api/admissions/')
+      fetch(API_URLS.admissions)
         .then(res => res.ok ? res.json() : [])
         .then(data => setAdmissions(Array.isArray(data) ? data : []));
 
-      fetch('/api/gallery/')
+      fetch(API_URLS.gallery)
         .then(res => res.ok ? res.json() : [])
         .then(data => setGalleryImages(Array.isArray(data) ? data : []));
     }
@@ -48,12 +49,12 @@ export default function Admin({ setCurrentPage }) {
     formData.append('title', title);
     formData.append('image', file);
     try {
-      const response = await fetch('/api/gallery/', { method: 'POST', body: formData });
+      const response = await fetch(API_URLS.gallery, { method: 'POST', body: formData });
       if (response.ok) {
         setTitle(''); setFile(null);
         alert('Published to Gallery!');
         // Refresh gallery
-        fetch('/api/gallery/')
+        fetch(API_URLS.gallery)
           .then(res => res.ok ? res.json() : [])
           .then(data => setGalleryImages(Array.isArray(data) ? data : []));
       } else alert('Upload failed.');
@@ -64,7 +65,7 @@ export default function Admin({ setCurrentPage }) {
   const handleDeleteImage = async (id) => {
     if (!window.confirm('Are you sure you want to delete this image?')) return;
     try {
-      const response = await fetch(`/api/gallery/${id}/`, { method: 'DELETE' });
+      const response = await fetch(`${API_URLS.gallery}${id}/`, { method: 'DELETE' });
       if (response.ok) {
         setGalleryImages(prev => prev.filter(img => img.id !== id));
       } else {
@@ -83,14 +84,14 @@ export default function Admin({ setCurrentPage }) {
     if (manualMember.photo) formData.append('profile_pic', manualMember.photo);
 
     try {
-      const response = await fetch('/api/admissions/', {
+      const response = await fetch(API_URLS.admissions, {
         method: 'POST',
         body: formData,
       });
       if (response.ok) {
         setManualMember({ name: '', phone: '', joinDate: '', photo: null });
         alert('Member added successfully!');
-        fetch('/api/admissions/')
+        fetch(API_URLS.admissions)
           .then(res => res.ok ? res.json() : [])
           .then(data => setAdmissions(Array.isArray(data) ? data : []));
       }
@@ -101,13 +102,13 @@ export default function Admin({ setCurrentPage }) {
   const handleMarkAsPaid = async (id) => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const response = await fetch(`/api/admissions/${id}/`, {
+      const response = await fetch(`${API_URLS.admissions}${id}/`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ last_payment_date: today }),
       });
       if (response.ok) {
-        fetch('/api/admissions/')
+        fetch(API_URLS.admissions)
           .then(res => res.ok ? res.json() : [])
           .then(data => setAdmissions(Array.isArray(data) ? data : []));
       }

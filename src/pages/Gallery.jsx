@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { API_URLS } from '../apiConfig';
 
 export default function Gallery() {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
-    fetch('/api/gallery/')
+    fetch(API_URLS.gallery)
       .then(res => res.json())
       .then(data => setImages(data))
       .catch(err => console.error('Error fetching images:', err));
