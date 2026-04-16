@@ -33,10 +33,11 @@ export default function Admission() {
       });
       if (response.ok) {
         alert(`Registration successful for ${formData.name}! Welcome to the Gym.`);
-        setFormData({ name: '', phone: '', photo: null });
+        setFormData({ name: '', phone: '', photo: null, feeType: 'registration' });
         if (e.target) e.target.reset();
       } else {
-        alert('Failed to register. Please try again.');
+        const errorData = await response.json().catch(() => ({}));
+        alert(`Failed to register: ${errorData.error || response.statusText}`);
       }
     } catch (error) {
       console.error('Error submitting admission:', error);
