@@ -37,6 +37,7 @@ export default function Admission() {
         if (e.target) e.target.reset();
       } else {
         const errorData = await response.json().catch(() => ({}));
+        console.error('SERVER RESPONDED WITH ERROR DATA:', errorData);
         alert(`Failed to register: ${errorData.error || response.statusText}`);
       }
     } catch (error) {
