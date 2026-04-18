@@ -11,6 +11,7 @@ export const API_URLS = {
   testimonials: `${BASE_URL}/api/testimonials/`,
   gallery: `${BASE_URL}/api/gallery/`,
   admissions: `${BASE_URL}/api/admissions/`,
+  overdue: `${BASE_URL}/api/admissions/overdue/`,
 };
 
 export default BASE_URL;

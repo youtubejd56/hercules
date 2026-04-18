@@ -6,7 +6,8 @@ export default function Admission() {
     name: '',
     phone: '',
     photo: null,
-    feeType: 'registration'
+    feeType: 'registration',
+    joinDate: new Date().toISOString().split('T')[0]
   });
   const [isPendingPayment, setIsPendingPayment] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -29,6 +30,11 @@ export default function Admission() {
     data.append('name', formData.name);
     data.append('phone', formData.phone);
     if (formData.photo) data.append('profile_pic', formData.photo);
+    data.append('plan', formData.feeType === 'registration' ? 'New Member' : 'Renewal');
+    
+    // Use the selected join date!
+    data.append('date_joined', formData.joinDate);
+    data.append('last_payment_date', formData.joinDate);
 
     try {
       const response = await fetch(API_URLS.admissions, {
@@ -114,6 +120,17 @@ export default function Admission() {
               placeholder="(555) 123-4567"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Joining Date</label>
+            <input
+              type="date"
+              className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans [color-scheme:dark]"
+              value={formData.joinDate}
+              onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
               required
             />
           </div>
