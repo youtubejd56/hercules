@@ -8,23 +8,26 @@ export default function Admission() {
     photo: null,
     feeType: 'registration'
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isPendingPayment, setIsPendingPayment] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleInitialSubmit = (e) => {
     e.preventDefault();
-    
     if (!/^\d{10}$/.test(formData.phone)) {
       return alert('Mobile number must be exactly 10 digits.');
     }
     if (formData.photo && formData.photo.size > 500 * 1024) {
       return alert('Profile photo size must be less than 500KB.');
     }
-    
+    setIsPendingPayment(true);
+  };
+
+  const finalSubmit = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     const data = new FormData();
     data.append('name', formData.name);
     data.append('phone', formData.phone);
-    // You could also send the fee type if the backend model accepts it.
-    // data.append('fee_type', formData.feeType);
     if (formData.photo) data.append('profile_pic', formData.photo);
 
     try {
@@ -33,19 +36,20 @@ export default function Admission() {
         body: data,
       });
       if (response.ok) {
-        setIsSubmitted(true);
+        alert(`Registration successful! Your data has been stored and is awaiting admin approval.`);
+        setIsPendingPayment(false);
+        setFormData({ name: '', phone: '', photo: null, feeType: 'registration' });
       } else {
         const errorData = await response.json().catch(() => ({}));
-        console.error('SERVER RESPONDED WITH ERROR DATA:', errorData);
         alert(`Failed to register: ${errorData.error || response.statusText}`);
       }
     } catch (error) {
-      console.error('Error submitting admission:', error);
       alert('Network error. Is the server running?');
     }
+    setIsSaving(false);
   };
 
-  if (isSubmitted) {
+  if (isPendingPayment) {
     const amount = formData.feeType === 'registration' ? 800 : 300;
     const upiLink = `upi://pay?pa=Q669733104@ybl&pn=Hercules%20GYM&am=${amount}&cu=INR`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
@@ -54,11 +58,11 @@ export default function Admission() {
       <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-8 animate-fade-in-up">
         <div className="bg-card p-8 md:p-12 rounded-2xl w-full max-w-md border border-white/5 shadow-[0_20px_40px_rgba(0,0,0,0.4)] text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-red-500 to-primary"></div>
-          <div className="w-20 h-20 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+          <div className="w-20 h-20 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2">Registration Saved!</h2>
-          <p className="text-gray-400 mb-8">Please complete your payment of <span className="font-bold text-white text-lg">₹{amount}</span> to confirm admission.</p>
+          <h2 className="text-3xl font-bold text-white mb-2">Payment Pending</h2>
+          <p className="text-gray-400 mb-8">Please complete your payment of <span className="font-bold text-white text-lg">₹{amount}</span> to submit your admission.</p>
           
           <div className="bg-white p-3 rounded-2xl mx-auto w-48 h-48 mb-6 shadow-xl shadow-black/50 hover:scale-105 transition-transform">
             <img src={qrUrl} alt="UPI QR Code" className="w-full h-full object-contain" />
@@ -72,8 +76,8 @@ export default function Admission() {
           </a>
           <p className="hidden md:block text-gray-500 text-sm mb-4">Note: Scan the QR code with your mobile UPI App (GPay/PhonePe).</p>
 
-          <button onClick={() => { setIsSubmitted(false); setFormData({ name: '', phone: '', photo: null, feeType: 'registration' }); }} className="w-full py-4 bg-transparent border border-white/10 text-gray-400 font-bold rounded-lg hover:bg-white/5 hover:text-white transition-all">
-            Finish
+          <button onClick={finalSubmit} disabled={isSaving} className="w-full py-4 bg-transparent border border-white/10 text-white font-bold rounded-lg hover:bg-white/5 transition-all">
+            {isSaving ? 'Submitting...' : 'I Have Paid (Finish)'}
           </button>
         </div>
       </div>
@@ -88,7 +92,7 @@ export default function Admission() {
           <p className="text-gray-400">Begin your fitness journey today.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleInitialSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">Full Name</label>
             <input
