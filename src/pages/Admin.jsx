@@ -28,6 +28,9 @@ export default function Admin({ setCurrentPage }) {
   const [galleryImages, setGalleryImages] = useState([]);
   const [manualMember, setManualMember] = useState({ name: '', phone: '', joinDate: '', photo: null });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  const [editingMember, setEditingMember] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', phone: '', joinDate: '', photo: null });
 
   React.useEffect(() => {
     if (isLogged) {
@@ -139,6 +142,53 @@ export default function Admin({ setCurrentPage }) {
     finally { setUploading(false); }
   };
 
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (editForm.phone && !/^\d{10}$/.test(editForm.phone)) {
+      return alert('Mobile number must be exactly 10 digits.');
+    }
+    if (editForm.photo && editForm.photo.size > 500 * 1024) {
+      return alert('Profile photo size must be less than 500KB.');
+    }
+    
+    setUploading(true);
+    const formData = new FormData();
+    if (editForm.name) formData.append('name', editForm.name);
+    if (editForm.phone) formData.append('phone', editForm.phone);
+    if (editForm.joinDate) formData.append('date_joined', editForm.joinDate);
+    if (editForm.photo) formData.append('profile_pic', editForm.photo);
+
+    try {
+      const response = await fetch(`${API_URLS.admissions}${editingMember.id}/`, {
+        method: 'PATCH',
+        body: formData,
+      });
+      if (response.ok) {
+        setEditingMember(null);
+        alert('Member updated successfully!');
+        fetch(API_URLS.admissions)
+          .then(res => res.ok ? res.json() : [])
+          .then(data => setAdmissions(Array.isArray(data) ? data : []));
+      } else {
+        const errMsg = await parseApiError(response);
+        console.error('Admission update failed', response.status, errMsg);
+        alert(`Failed to update member: ${errMsg}`);
+      }
+    } catch (error) { console.error(error); alert('Network error. Check your connection.'); }
+    finally { setUploading(false); }
+  };
+
+  const openEditModal = (member) => {
+    setEditingMember(member);
+    setEditForm({
+      name: member.name || '',
+      phone: member.phone || '',
+      joinDate: member.date_joined ? String(member.date_joined).split('T')[0] : '',
+      photo: null
+    });
+  };
+
   const handleMarkAsPaid = async (id) => {
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -214,7 +264,7 @@ export default function Admin({ setCurrentPage }) {
               <h2 className="text-3xl font-bold mb-6">Upload Image to Gallery</h2>
               <form onSubmit={handleUpload} className="bg-card border border-white/10 p-8 rounded-2xl shadow-2xl">
                 <input type="text" placeholder="Post Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full mb-4 px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white outline-none focus:border-primary transition-all" required />
-                <input type="file" accept="image/*" ref={fileInputRef} onChange={e => setFile(e.target.files[0])} className="w-full mb-8 text-gray-400" required />
+                <input type="file" accept="image/*" ref={fileInputRef} onChange={e => setFile(e.target.files[0])} className="w-full mb-8 bg-black/20 border border-white/10 rounded-lg text-gray-400 file:mr-4 file:py-3 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-all" required />
                 <button type="submit" disabled={uploading} className="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-red-600 shadow-xl shadow-primary/20"> {uploading ? 'Uploading...' : 'Publish to Gallery'} </button>
               </form>
             </div>
@@ -297,7 +347,8 @@ export default function Admin({ setCurrentPage }) {
                         <td className="p-5">
                           <div className="flex flex-col gap-2">
                             <button onClick={() => handleMarkAsPaid(r.id)} className="px-4 py-2 bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg hover:bg-blue-600 hover:text-white transition-all text-xs font-bold">✅ Mark as Paid</button>
-                            <a href={`https://wa.me/${(() => { const num = r.phone?.replace(/[^0-9]/g, ''); return num?.startsWith('91') ? num : `91${num}`; })()}?text=Hello%20${encodeURIComponent(r.name)},%20this%20is%20a%20friendly%20reminder%20from%20*Hercules%20MultiGYM*.%20Your%20monthly%20gym%20fee%20of%20*₹300*%20is%20currently%20*pending*%20(Due:%20${nextDue}).%20Please%20clear%20it%20at%20your%20earliest%20convenience.%20Thank%20you!`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600/20 text-green-500 border border-green-500/30 rounded-lg hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold"><span>💬 Reminder</span></a>
+                            <a href={`https://wa.me/${(() => { const num = r.phone?.replace(/[^0-9]/g, ''); return num?.startsWith('91') ? num : `91${num}`; })()}?text=Hello%20${encodeURIComponent(r.name)},%20this%20is%20a%20friendly%20reminder%20from%20*Hercules%20GYM%20PALA*.%20Your%20monthly%20gym%20fee%20of%20*₹300*%20is%20currently%20*pending*%20(Due:%20${nextDue}).%20Please%20clear%20it%20at%20your%20earliest%20convenience%20via%20Cash%20or%20our%20UPI:%20*Q669733104@ybl*.%20Thank%20you!`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600/20 text-green-500 border border-green-500/30 rounded-lg hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold"><span>💬 Reminder</span></a>
+                            <button onClick={() => openEditModal(r)} className="px-4 py-2 bg-yellow-600/20 text-yellow-500 border border-yellow-500/30 rounded-lg hover:bg-yellow-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold">✏️ Edit</button>
                           </div>
                         </td>
                       </tr>
@@ -316,12 +367,28 @@ export default function Admin({ setCurrentPage }) {
               <div><label className="block text-sm font-medium text-gray-400 mb-2">Member Name</label><input type="text" value={manualMember.name} onChange={e => setManualMember({ ...manualMember, name: e.target.value })} className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white" required /></div>
               <div><label className="block text-sm font-medium text-gray-400 mb-2">Phone Number</label><input type="tel" value={manualMember.phone} onChange={e => setManualMember({ ...manualMember, phone: e.target.value })} className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white" required /></div>
               <div><label className="block text-sm font-medium text-gray-400 mb-2">Joint Date</label><input type="date" value={manualMember.joinDate} onChange={e => setManualMember({ ...manualMember, joinDate: e.target.value })} className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white" /></div>
-              <div><label className="block text-sm font-medium text-gray-400 mb-2">Upload Pic</label><input type="file" accept="image/*" onChange={e => setManualMember({ ...manualMember, photo: e.target.files[0] })} className="w-full text-gray-400" /></div>
+              <div><label className="block text-sm font-medium text-gray-400 mb-2">Upload Pic</label><input type="file" accept="image/*" onChange={e => setManualMember({ ...manualMember, photo: e.target.files[0] })} className="w-full bg-black/20 border border-white/10 rounded-lg text-gray-400 file:mr-4 file:py-3 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-all" /></div>
               <button type="submit" disabled={uploading} className="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-red-600 transition-all shadow-xl shadow-primary/10">{uploading ? 'Registering...' : 'Save Member Data'}</button>
             </form>
           </div>
         )}
       </main>
+
+      {editingMember && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-card p-8 rounded-2xl w-full max-w-md border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4)] animate-slide-up relative">
+            <button onClick={() => setEditingMember(null)} className="absolute top-4 right-4 text-gray-500 hover:text-white text-xl">✕</button>
+            <h2 className="text-2xl font-bold mb-6">Edit Member</h2>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div><label className="block text-sm font-medium text-gray-400 mb-2">Member Name</label><input type="text" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white" required /></div>
+              <div><label className="block text-sm font-medium text-gray-400 mb-2">Phone Number</label><input type="tel" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white" required /></div>
+              <div><label className="block text-sm font-medium text-gray-400 mb-2">Joint Date</label><input type="date" value={editForm.joinDate} onChange={e => setEditForm({ ...editForm, joinDate: e.target.value })} className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white" /></div>
+              <div><label className="block text-sm font-medium text-gray-400 mb-2">Update Pic (Optional)</label><input type="file" accept="image/*" onChange={e => setEditForm({ ...editForm, photo: e.target.files[0] })} className="w-full bg-black/20 border border-white/10 rounded-lg text-gray-400 file:mr-4 file:py-3 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-all" /></div>
+              <button type="submit" disabled={uploading} className="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-red-600 transition-all shadow-xl shadow-primary/10">{uploading ? 'Updating...' : 'Save Changes'}</button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
