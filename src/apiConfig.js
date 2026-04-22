@@ -12,6 +12,11 @@ export const API_URLS = {
   gallery: `${BASE_URL}/api/gallery/`,
   admissions: `${BASE_URL}/api/admissions/`,
   overdue: `${BASE_URL}/api/admissions/overdue/`,
+  // Auth
+  register: `${BASE_URL}/api/auth/register/`,
+  login:    `${BASE_URL}/api/auth/login/`,
+  logout:   `${BASE_URL}/api/auth/logout/`,
+  me:       `${BASE_URL}/api/auth/me/`,
 };
 
 export default BASE_URL;

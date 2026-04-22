@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import logo from '../assets/Logo a.jpg.jpeg';
 
-export default function Header({ currentPage, setCurrentPage }) {
+export default function Header({ currentPage, setCurrentPage, authUser, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
@@ -42,6 +42,35 @@ export default function Header({ currentPage, setCurrentPage }) {
         >
           Admin
         </button>
+
+        {/* Auth Controls */}
+        {authUser ? (
+          <div className="ml-4 flex items-center gap-2">
+            <div className="header-user-chip" style={{ cursor: 'pointer' }}
+              onClick={() => handleNavigate('profile')}
+              title="View profile"
+            >
+              <span className="header-user-avatar">{authUser.username?.[0]?.toUpperCase()}</span>
+              <span className="header-user-name">{authUser.username}</span>
+            </div>
+            <button
+              id="header-logout-btn"
+              className="header-logout-btn"
+              onClick={onLogout}
+              title="Sign out"
+            >
+              Sign Out
+            </button>
+          </div>
+        ) : (
+          <button
+            id="header-signin-btn"
+            className="ml-4 px-5 py-2 bg-lime rounded-lg font-bold text-xs uppercase tracking-wide text-black transition-all duration-300 hover:opacity-90 hover:scale-105"
+            onClick={() => handleNavigate('login')}
+          >
+            Sign In
+          </button>
+        )}
       </div>
 
       {/* Mobile Toggle Button */}
@@ -74,6 +103,32 @@ export default function Header({ currentPage, setCurrentPage }) {
           >
             🔐 Admin Dashboard
           </button>
+          {authUser ? (
+            <>
+              <button
+                id="mobile-profile-btn"
+                className={`text-left p-4 rounded-xl text-lg font-bold border-t border-white/10 mt-2 ${currentPage === 'profile' ? 'bg-lime text-black shadow-lg' : 'text-lime/70 hover:bg-white/5 hover:text-lime'}`}
+                onClick={() => handleNavigate('profile')}
+              >
+                👤 My Profile & Steps
+              </button>
+              <button
+                id="mobile-logout-btn"
+                className="text-left p-4 rounded-xl text-lg font-bold text-red-400 hover:text-red-300 border-t border-white/10 mt-2"
+                onClick={() => { setIsMenuOpen(false); onLogout(); }}
+              >
+                Sign Out ({authUser.username})
+              </button>
+            </>
+          ) : (
+            <button
+              id="mobile-signin-btn"
+              className="text-left p-4 rounded-xl text-lg font-bold text-lime-400 hover:text-lime-300 border-t border-white/10 mt-2"
+              onClick={() => handleNavigate('login')}
+            >
+              ⚡ Sign In
+            </button>
+          )}
         </div>
       )}
     </nav>
