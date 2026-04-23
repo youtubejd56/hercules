@@ -45,8 +45,8 @@ export default function Register({ onNavigate, onLoginSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!form.username.trim()) { setError('Username is required.'); return; }
-    if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (!/^\d{10}$/.test(form.phone)) { setError('Phone number must be exactly 10 digits.'); return; }
+    if (form.password.length < 8) { setError('Password must be at least 8 characters.'); return; }
     if (form.password !== form.confirm) { setError('Passwords do not match.'); return; }
 
     setLoading(true);
@@ -190,14 +190,15 @@ export default function Register({ onNavigate, onLoginSuccess }) {
                 />
               </div>
               <div className="auth-field">
-                <label htmlFor="reg-phone">Phone</label>
+                <label htmlFor="reg-phone">Phone *</label>
                 <input
                   id="reg-phone"
                   name="phone"
                   type="tel"
-                  placeholder="+91 00000 00000"
+                  placeholder="10 digit mobile number"
                   value={form.phone}
                   onChange={handleChange}
+                  required
                 />
               </div>
               <div className="auth-field">
@@ -206,7 +207,7 @@ export default function Register({ onNavigate, onLoginSuccess }) {
                   id="reg-password"
                   name="password"
                   type="password"
-                  placeholder="Min. 6 characters"
+                  placeholder="Min. 8 characters"
                   value={form.password}
                   onChange={handleChange}
                   required
