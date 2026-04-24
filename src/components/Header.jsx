@@ -17,6 +17,15 @@ export default function Header({ currentPage, setCurrentPage, authUser, onLogout
     setIsMenuOpen(false);
   };
 
+  React.useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isMenuOpen]);
+
   return (
     <nav className="flex justify-between items-center py-4 px-6 md:px-12 bg-dark/80 backdrop-blur-md sticky top-0 z-[100] border-b border-white/5">
       {/* Logo Section */}
@@ -85,52 +94,76 @@ export default function Header({ currentPage, setCurrentPage, authUser, onLogout
         )}
       </button>
 
-      {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-card/95 backdrop-blur-xl border-b border-white/10 flex flex-col p-6 gap-4 md:hidden animate-slide-down shadow-2xl overflow-hidden z-[100]">
-          {navLinks.map((link) => (
-            <button
-              key={link.id}
-              className={`text-left p-4 rounded-xl text-lg font-bold transition-all ${currentPage === link.id ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-              onClick={() => handleNavigate(link.id)}
-            >
-              {link.label}
+      {/* Mobile Side Drawer */}
+      <div className={`fixed inset-0 z-[200] transition-all duration-500 ${isMenuOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
+        {/* Backdrop - Solid darkness to completely isolate the menu without blur */}
+        <div className="absolute inset-0 bg-black/95" onClick={() => setIsMenuOpen(false)} />
+        
+        {/* Drawer Content */}
+        <div className={`absolute top-0 right-0 h-full w-[80%] max-w-[300px] bg-[#0d0d0d] border-l border-white/10 p-6 flex flex-col gap-6 shadow-[0_0_100px_rgba(0,0,0,1)] transition-transform duration-500 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xl font-bold italic tracking-tighter text-white">MENU</span>
+            <button onClick={() => setIsMenuOpen(false)} className="p-2 text-gray-400 hover:text-white">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-          ))}
-          <button
-            className={`text-left p-4 rounded-xl text-lg font-bold border-t border-white/10 mt-2 ${currentPage === 'admin' ? 'text-primary' : 'text-primary/70 hover:text-primary'}`}
-            onClick={() => handleNavigate('admin')}
-          >
-            🔐 Admin Dashboard
-          </button>
-          {authUser ? (
-            <>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {navLinks.map((link) => (
               <button
-                id="mobile-profile-btn"
-                className={`text-left p-4 rounded-xl text-lg font-bold border-t border-white/10 mt-2 ${currentPage === 'profile' ? 'bg-lime text-black shadow-lg' : 'text-lime/70 hover:bg-white/5 hover:text-lime'}`}
-                onClick={() => handleNavigate('profile')}
+                key={link.id}
+                className={`flex items-center gap-4 p-4 rounded-xl text-lg font-bold transition-all ${currentPage === link.id ? 'bg-primary/10 text-primary' : 'text-gray-300 hover:bg-white/5'}`}
+                onClick={() => handleNavigate(link.id)}
               >
-                👤 My Profile & Steps
+                <span className="opacity-70">
+                  {link.id === 'home' && '🏠'}
+                  {link.id === 'about' && 'ℹ️'}
+                  {link.id === 'trainers' && '👟'}
+                  {link.id === 'admission' && '📋'}
+                  {link.id === 'gallery' && '🖼️'}
+                </span>
+                {link.label}
               </button>
-              <button
-                id="mobile-logout-btn"
-                className="text-left p-4 rounded-xl text-lg font-bold text-red-400 hover:text-red-300 border-t border-white/10 mt-2"
-                onClick={() => { setIsMenuOpen(false); onLogout(); }}
-              >
-                Sign Out ({authUser.username})
-              </button>
-            </>
-          ) : (
+            ))}
+          </div>
+
+          <div className="mt-auto flex flex-col gap-3">
             <button
-              id="mobile-signin-btn"
-              className="text-left p-4 rounded-xl text-lg font-bold text-lime-400 hover:text-lime-300 border-t border-white/10 mt-2"
-              onClick={() => handleNavigate('login')}
+              className={`flex items-center gap-4 p-4 rounded-xl text-lg font-bold border border-white/10 ${currentPage === 'admin' ? 'text-primary bg-primary/5' : 'text-primary/70'}`}
+              onClick={() => handleNavigate('admin')}
             >
-              ⚡ Sign In
+              🔐 Admin Dashboard
             </button>
-          )}
+
+            {authUser ? (
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
+                    {authUser.username?.[0]?.toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-white font-bold">{authUser.username}</p>
+                    <p className="text-gray-500 text-xs uppercase tracking-widest">Member</p>
+                  </div>
+                </div>
+                <button
+                  className="w-full py-3 bg-red-600/20 text-red-500 rounded-xl font-bold hover:bg-red-600 hover:text-white transition-all"
+                  onClick={() => { setIsMenuOpen(false); onLogout(); }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                className="w-full py-4 bg-lime text-black rounded-xl font-bold text-lg"
+                onClick={() => handleNavigate('login')}
+              >
+                ⚡ SIGN IN
+              </button>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 }

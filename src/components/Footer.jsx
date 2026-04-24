@@ -3,7 +3,7 @@ import logo from '../assets/Logo a.jpg.jpeg';
 
 export default function Footer({ onNavigate }) {
   return (
-    <footer className="bg-[#0a0a0a] border-t border-white/5 pt-16 pb-8 mt-auto">
+    <footer className="bg-[#0a0a0a] border-t border-white/5 pt-16 pb-24 md:pb-8 mt-auto">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 lg:gap-12 mb-12">
 
@@ -65,13 +65,16 @@ export default function Footer({ onNavigate }) {
                 <span>097477 69945</span>
               </li>
             </ul>
+
           </div>
 
         </div>
 
-        {/* Copyright */}
         <div className="pt-8 border-t border-white/5 text-center flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-500 text-sm">&copy; {new Date().getFullYear()} Hercules GYMPALA. Built for Strength.</p>
+          <div className="flex flex-col md:items-start items-center gap-1">
+            <p className="text-gray-500 text-sm">&copy; {new Date().getFullYear()} Hercules GYMPALA. Built for Strength.</p>
+            <p className='text-gray-500 text-xs hover:text-red-400 transition-colors cursor-pointer'>Developed by Vinayak nv</p>
+          </div>
           <div className="flex gap-6 text-sm text-gray-500">
             <button onClick={() => onNavigate('terms')} className="hover:text-primary transition-colors">Privacy Policy</button>
             <button onClick={() => onNavigate('terms')} className="hover:text-primary transition-colors">Legal</button>

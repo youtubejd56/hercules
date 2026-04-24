@@ -14,12 +14,28 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Offline from './components/Offline';
+import BottomNav from './components/BottomNav';
 import { getUser, clearAuth } from './utils/auth';
 import './index.css';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [authUser, setAuthUser] = useState(getUser);
+  const [isOnline, setIsOnline] = useState(window.navigator.onLine);
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Scroll to top when page changes
   React.useEffect(() => {
@@ -40,6 +56,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-dark text-white font-sans">
+      {!isOnline && <Offline onRetry={() => window.location.reload()} />}
       {!noHeaderFooter && (
         <Header
           currentPage={currentPage}
@@ -49,7 +66,7 @@ function App() {
         />
       )}
 
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col pb-20 md:pb-0">
         {currentPage === 'home'     && <Home onNavigate={setCurrentPage} />}
         {currentPage === 'admission'&& <Admission />}
         {currentPage === 'admin'    && <Admin setCurrentPage={setCurrentPage} />}
@@ -72,6 +89,7 @@ function App() {
       </main>
 
       {!noHeaderFooter && <Footer onNavigate={setCurrentPage} />}
+      <BottomNav currentPage={currentPage} setCurrentPage={setCurrentPage} authUser={authUser} />
     </div>
   );
 }
