@@ -25,11 +25,23 @@ function App() {
   const [isOnline, setIsOnline] = useState(window.navigator.onLine);
 
   React.useEffect(() => {
+    // Standard web fallback
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    // Reliable native Capacitor network check
+    import('@capacitor/network').then(({ Network }) => {
+      Network.getStatus().then(status => {
+        setIsOnline(status.connected);
+      });
+      Network.addListener('networkStatusChange', status => {
+        setIsOnline(status.connected);
+      });
+    }).catch(() => {
+      // Ignore if not running in capacitor
+    });
 
     return () => {
       window.removeEventListener('online', handleOnline);
