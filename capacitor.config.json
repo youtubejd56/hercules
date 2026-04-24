@@ -4,6 +4,7 @@
   "webDir": "dist",
   "server": {
     "url": "https://hercules-mb5m.onrender.com/",
-    "cleartext": true
+    "cleartext": true,
+    "errorPath": "offline.html"
   }
 }

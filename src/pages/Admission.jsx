@@ -27,9 +27,9 @@ export default function Admission() {
     if (isSaving) return;
     setIsSaving(true);
     const data = new FormData();
-    data.append('name', formData.name);
+    data.append('name', formData.feeType === 'monthly' ? `Renewal - ${formData.phone}` : formData.name);
     data.append('phone', formData.phone);
-    if (formData.photo) data.append('profile_pic', formData.photo);
+    if (formData.feeType === 'registration' && formData.photo) data.append('profile_pic', formData.photo);
     data.append('plan', formData.feeType === 'registration' ? 'New Member' : 'Renewal');
     
     // Use the selected join date!
@@ -99,17 +99,19 @@ export default function Admission() {
         </div>
 
         <form onSubmit={handleInitialSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Full Name</label>
-            <input
-              type="text"
-              className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans"
-              placeholder="John Doe"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-            />
-          </div>
+          {formData.feeType === 'registration' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-2">Full Name</label>
+              <input
+                type="text"
+                className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans"
+                placeholder="John Doe"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            </div>
+          )}
 
 
           <div>
@@ -124,26 +126,30 @@ export default function Admission() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Joining Date</label>
-            <input
-              type="date"
-              className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans [color-scheme:dark]"
-              value={formData.joinDate}
-              onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
-              required
-            />
-          </div>
+          {formData.feeType === 'registration' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Joining Date</label>
+                <input
+                  type="date"
+                  className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans [color-scheme:dark]"
+                  value={formData.joinDate}
+                  onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
+                  required
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Upload Profile Picture</label>
-            <input
-              type="file"
-              accept="image/*"
-              className="w-full bg-black/20 border border-white/10 rounded-lg text-gray-400 file:mr-4 file:py-3 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-all"
-              onChange={(e) => setFormData({ ...formData, photo: e.target.files[0] })}
-            />
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Upload Profile Picture</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="w-full bg-black/20 border border-white/10 rounded-lg text-gray-400 file:mr-4 file:py-3 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-all"
+                  onChange={(e) => setFormData({ ...formData, photo: e.target.files[0] })}
+                />
+              </div>
+            </>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">Registration Type</label>
