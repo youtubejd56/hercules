@@ -27,7 +27,7 @@ export default function Header({ currentPage, setCurrentPage, authUser, onLogout
   }, [isMenuOpen]);
 
   return (
-    <nav className="flex justify-between items-center py-4 px-6 md:px-12 bg-dark/80 backdrop-blur-md sticky top-0 z-[100] border-b border-white/5">
+    <nav className="flex justify-between items-center py-4 px-6 md:px-12 bg-dark/80  sticky top-0 z-[100] border-b border-white/5">
       {/* Logo Section */}
       <div className="flex items-center gap-3 text-lg md:text-xl font-extrabold uppercase tracking-widest text-white cursor-pointer" onClick={() => handleNavigate('home')}>
         <img src={logo} alt="Hercules Gym Logo" className="w-10 h-10 md:w-12 md:h-12 object-cover rounded-full border-2 border-primary shadow-[0_0_15px_rgba(255,62,62,0.3)]" />
@@ -83,7 +83,7 @@ export default function Header({ currentPage, setCurrentPage, authUser, onLogout
       </div>
 
       {/* Mobile Toggle Button */}
-      <button 
+      <button
         className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
       >
@@ -97,10 +97,10 @@ export default function Header({ currentPage, setCurrentPage, authUser, onLogout
       {/* Mobile Side Drawer */}
       <div className={`fixed inset-0 z-[200] transition-all duration-500 ${isMenuOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
         {/* Backdrop - Solid darkness to completely isolate the menu without blur */}
-        <div className="absolute inset-0 bg-black/95" onClick={() => setIsMenuOpen(false)} />
-        
+        <div className="absolute inset-0 bg-black" onClick={() => setIsMenuOpen(false)} />
+
         {/* Drawer Content */}
-        <div className={`absolute top-0 right-0 h-full w-[80%] max-w-[300px] bg-[#0d0d0d] border-l border-white/10 p-6 flex flex-col gap-6 shadow-[0_0_100px_rgba(0,0,0,1)] transition-transform duration-500 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`absolute top-0 right-0 h-full w-[80%] max-w-[300px] bg-[#0d0d0d] border-l border-white/10 p-6 pb-24 flex flex-col gap-6 shadow-[0_0_100px_rgba(0,0,0,1)] transition-transform duration-500 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xl font-bold italic tracking-tighter text-white">MENU</span>
             <button onClick={() => setIsMenuOpen(false)} className="p-2 text-gray-400 hover:text-white">

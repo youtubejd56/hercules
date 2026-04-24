@@ -31,7 +31,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
       } else {
         saveAuth(data.token, data.user);
         onLoginSuccess && onLoginSuccess(data.user);
-        onNavigate('home');
+        onNavigate('profile');
       }
     } catch {
       setError('Network error. Please try again.');

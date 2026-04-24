@@ -312,7 +312,33 @@ export default function Profile({ onNavigate, onLogout }) {
       .then(r => r.json()).then(d => setProfile(d)).catch(() => { });
   }, []);
 
-  if (!user) return <div className="prof-empty"><button onClick={() => onNavigate('login')}>Sign In</button></div>;
+  if (!user) return (
+    <div className="prof-page flex items-center justify-center p-6 min-h-[calc(100vh-80px)]">
+      <div className="max-w-md w-full bg-[#181818] border border-white/10 rounded-3xl p-8 text-center shadow-2xl animate-fade-in-up">
+        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20">
+          <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </div>
+        <h2 className="text-2xl font-extrabold text-white mb-3">Members Only</h2>
+        <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+          Unlock your full potential. Sign in to track your live workouts, access AI diet plans, and view your personal fitness statistics.
+        </p>
+        <button 
+          onClick={() => onNavigate('login')}
+          className="w-full py-4 bg-primary text-white rounded-xl font-bold text-lg hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(255,62,62,0.3)] transition-all duration-300"
+        >
+          Sign In Now
+        </button>
+        <button 
+          onClick={() => onNavigate('register')}
+          className="w-full mt-4 py-4 bg-transparent border border-white/10 text-white rounded-xl font-bold text-sm hover:bg-white/5 transition-all duration-300"
+        >
+          Create New Account
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="prof-page">
@@ -435,7 +461,11 @@ export default function Profile({ onNavigate, onLogout }) {
       <div className="prof-hero">
         <div className="prof-avatar">{user.username?.[0]?.toUpperCase()}</div>
         <div className="prof-info-stack"><h2 className="prof-username">{user.username}</h2></div>
-        <button className="prof-logout-btn" onClick={onLogout}>⏻</button>
+        <button className="prof-logout-btn" onClick={onLogout} title="Sign Out">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636a9 9 0 11-12.728 0M12 3v9" />
+          </svg>
+        </button>
       </div>
 
       <div className="prof-tabs">
