@@ -1,10 +1,5 @@
 {
   "appId": "com.hercules.gym",
   "appName": "HerculesGym",
-  "webDir": "dist",
-  "server": {
-    "url": "https://hercules-mb5m.onrender.com/",
-    "cleartext": true,
-    "errorPath": "offline.html"
-  }
+  "webDir": "dist"
 }
