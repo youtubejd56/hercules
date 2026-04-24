@@ -6,7 +6,7 @@ const Offline = ({ onRetry }) => {
       <div className="relative mb-12">
         {/* Glow effect */}
         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-[2] animate-pulse"></div>
-        
+
         {/* Radar Ping Animations */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full border border-primary/40 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full border border-primary/20 rounded-full animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }}></div>
@@ -22,16 +22,16 @@ const Offline = ({ onRetry }) => {
           </svg>
         </div>
       </div>
-      
+
       <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-4 uppercase tracking-widest animate-pulse">
-        Searching...
+        No connection...
       </h1>
-      
+
       <p className="text-gray-400 text-sm md:text-base max-w-md mx-auto mb-10 leading-relaxed">
-        It looks like you've gone off the grid. Check your internet connection to continue your fitness journey and sync your latest stats.
+        Please check your internet connection and try again.
       </p>
-      
-      <button 
+
+      <button
         onClick={onRetry}
         className="px-8 py-4 bg-primary text-white font-bold rounded-xl uppercase tracking-widest hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(255,62,62,0.3)] transition-all duration-300 flex items-center gap-3 mx-auto"
       >
