@@ -8,7 +8,7 @@ const parseApiError = async (response) => {
     if (typeof payload?.error === 'string') return payload.error;
     if (typeof payload?.detail === 'string') return payload.detail;
     if (payload?.error && typeof payload.error === 'object') return JSON.stringify(payload.error);
-    
+
     // Handle DRF field errors like {"phone": ["..."]}
     if (typeof payload === 'object' && payload !== null) {
       const firstError = Object.values(payload)[0];
@@ -16,7 +16,7 @@ const parseApiError = async (response) => {
       if (typeof firstError === 'string') return firstError;
       return JSON.stringify(payload);
     }
-    
+
     return response.statusText || 'Request failed';
   }
   const text = await response.text().catch(() => '');
@@ -26,7 +26,7 @@ const parseApiError = async (response) => {
 export default function Admin({ setCurrentPage }) {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [isLogged, setIsLogged] = useState(false);
-  const [adminView, setAdminView] = useState('uploads'); // 'uploads', 'admissions', 'add_member'
+  const [adminView, setAdminView] = useState('all_members'); // 'uploads', 'new_admissions', 'add_member', 'all_members', 'renewals', 'overdue'
 
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
@@ -38,7 +38,7 @@ export default function Admin({ setCurrentPage }) {
   const [galleryImages, setGalleryImages] = useState([]);
   const [manualMember, setManualMember] = useState({ name: '', phone: '', joinDate: '', photo: null });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
+
   const [editingMember, setEditingMember] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', phone: '', joinDate: '', photo: null });
 
@@ -120,7 +120,7 @@ export default function Admin({ setCurrentPage }) {
 
   const handleManualMember = async (e) => {
     e.preventDefault();
-    
+
     if (!/^\d{10}$/.test(manualMember.phone)) {
       return alert('Mobile number must be exactly 10 digits.');
     }
@@ -156,14 +156,14 @@ export default function Admin({ setCurrentPage }) {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (editForm.phone && !/^\d{10}$/.test(editForm.phone)) {
       return alert('Mobile number must be exactly 10 digits.');
     }
     if (editForm.photo && editForm.photo.size > 500 * 1024) {
       return alert('Profile photo size must be less than 500KB.');
     }
-    
+
     setUploading(true);
     const formData = new FormData();
     if (editForm.name) formData.append('name', editForm.name);
@@ -262,18 +262,32 @@ export default function Admin({ setCurrentPage }) {
         <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/10">
           <h3 className="text-xl font-bold text-gray-300 tracking-tight">DASHBOARD</h3>
         </div>
-        <button onClick={() => { setAdminView('uploads'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all ${adminView === 'uploads' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>⚙️ Image Uploads</button>
-        <button onClick={() => { setAdminView('admissions'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all ${adminView === 'admissions' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>📋 Admission Data</button>
-        <button onClick={() => { setAdminView('renewals'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all ${adminView === 'renewals' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>💳 Monthly Fees</button>
-        <button onClick={() => { setAdminView('overdue'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all flex items-center justify-between ${adminView === 'overdue' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>
-          <span>🚨 Fee Due</span>
+        <button onClick={() => { setAdminView('all_members'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all flex items-center gap-3 ${adminView === 'all_members' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>
+          <span className="text-xl">👥</span> All Members
+        </button>
+        <button onClick={() => { setAdminView('new_admissions'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all flex items-center gap-3 ${adminView === 'new_admissions' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>
+          <span className="text-xl">🆕</span> New Admissions
+        </button>
+        <button onClick={() => { setAdminView('renewals'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all flex items-center gap-3 ${adminView === 'renewals' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>
+          <span className="text-xl">🔄</span> Fee Renewals
+        </button>
+        <button onClick={() => { setAdminView('overdue'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all flex items-center justify-between gap-3 ${adminView === 'overdue' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🚨</span> Fee Due
+          </div>
           {overdueAdmissions.length > 0 && (
             <span className="bg-white text-primary text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
               {overdueAdmissions.length}
             </span>
           )}
         </button>
-        <button onClick={() => { setAdminView('add_member'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all ${adminView === 'add_member' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>👤 Add Member</button>
+        <div className="my-2 border-t border-white/5"></div>
+        <button onClick={() => { setAdminView('add_member'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all flex items-center gap-3 ${adminView === 'add_member' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>
+          <span className="text-xl">👤</span> Add Member
+        </button>
+        <button onClick={() => { setAdminView('uploads'); setIsSidebarOpen(false); }} className={`text-left p-3 rounded-lg font-semibold transition-all flex items-center gap-3 ${adminView === 'uploads' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}>
+          <span className="text-xl">⚙️</span> Gallery Setup
+        </button>
 
         <div className="mt-auto pt-8 mb-4 border-t border-white/10 flex flex-col gap-4">
           <button onClick={() => setCurrentPage('home')} className="w-full p-3 text-left rounded-lg text-gray-400 hover:bg-white/5 flex items-center gap-2">🌐 Go to Site</button>
@@ -283,150 +297,194 @@ export default function Admin({ setCurrentPage }) {
 
       <main className="flex-1 p-4 md:p-12 overflow-y-auto">
         {adminView === 'uploads' && (
-          <div className="max-w-4xl mx-auto space-y-12">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Upload Image to Gallery</h2>
-              <form onSubmit={handleUpload} className="bg-card border border-white/10 p-8 rounded-2xl shadow-2xl">
-                <input type="text" placeholder="Post Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full mb-4 px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white outline-none focus:border-primary transition-all" required />
-                <input type="file" accept="image/*" ref={fileInputRef} onChange={e => setFile(e.target.files[0])} className="w-full mb-8 bg-black/20 border border-white/10 rounded-lg text-gray-400 file:mr-4 file:py-3 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-all" required />
-                <button type="submit" disabled={uploading} className="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-red-600 shadow-xl shadow-primary/20"> {uploading ? 'Uploading...' : 'Publish to Gallery'} </button>
+          <div className="max-w-4xl mx-auto space-y-12 animate-fade-in">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold">Gallery Management</h2>
+              <div className="bg-white/5 px-4 py-2 rounded-full border border-white/10 text-sm text-gray-400">
+                {galleryImages.length} Images Uploaded
+              </div>
+            </div>
+
+            <div className="bg-card border border-white/10 p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <span className="text-6xl">🖼️</span>
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-primary">Upload New Post</h3>
+              <form onSubmit={handleUpload} className="space-y-4">
+                <input type="text" placeholder="Post Title (e.g. Morning Workout)" value={title} onChange={e => setTitle(e.target.value)} className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white outline-none focus:border-primary transition-all" required />
+                <input type="file" accept="image/*" ref={fileInputRef} onChange={e => setFile(e.target.files[0])} className="w-full bg-black/20 border border-white/10 rounded-lg text-gray-400 file:mr-4 file:py-3 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer transition-all" required />
+                <button type="submit" disabled={uploading} className="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-red-600 shadow-xl shadow-primary/20 transition-all active:scale-[0.98]"> {uploading ? 'Processing...' : 'Publish to Gallery'} </button>
               </form>
             </div>
 
             <div>
-              <h3 className="text-2xl font-bold mb-6 text-gray-400">Manage Gallery Images</h3>
+              <h3 className="text-2xl font-bold mb-6 text-gray-400 flex items-center gap-2">
+                <span className="w-2 h-8 bg-primary rounded-full"></span>
+                Active Gallery
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {galleryImages.map(img => (
-                  <div key={img.id} className="bg-card rounded-xl border border-white/5 overflow-hidden group shadow-lg">
+                  <div key={img.id} className="bg-card rounded-xl border border-white/5 overflow-hidden group shadow-lg hover:border-primary/30 transition-all">
                     <div className="h-48 relative overflow-hidden">
-                       <img src={img.image?.startsWith('res.cloudinary.com') ? `https://${img.image}` : img.image} alt={img.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                          <button onClick={() => handleDeleteImage(img.id)} className="bg-red-600 text-white p-3 rounded-full hover:bg-red-700 shadow-2xl transform scale-75 group-hover:scale-100 transition-all">🗑️ Delete</button>
-                       </div>
+                      <img src={img.image?.startsWith('res.cloudinary.com') ? `https://${img.image}` : img.image} alt={img.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2">
+                        <button onClick={() => handleDeleteImage(img.id)} className="bg-red-600 text-white px-6 py-2 rounded-full font-bold hover:bg-red-700 shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-all">🗑️ Remove</button>
+                      </div>
                     </div>
                     <div className="p-4 bg-black/40 border-t border-white/5">
-                       <p className="font-bold text-sm truncate">{img.title}</p>
+                      <p className="font-bold text-sm truncate text-gray-300">{img.title}</p>
                     </div>
                   </div>
                 ))}
+                {galleryImages.length === 0 && (
+                  <div className="col-span-full py-20 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
+                    <p className="text-gray-500">No images found in gallery. Start uploading!</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
 
-        {adminView === 'admissions' && (
-          <div>
-            <h2 className="text-3xl font-bold mb-6">Admission Data</h2>
-            <div className="bg-card rounded-2xl overflow-x-auto border border-white/10 shadow-2xl custom-scrollbar">
-              <table className="w-full text-left min-w-[900px]">
-                <thead className="bg-black/40">
-                  <tr>
-                    <th className="p-5 font-semibold text-gray-400">Photo</th>
-                    <th className="p-5 font-semibold text-gray-400">Name</th>
-                    <th className="p-5 font-semibold text-gray-400">Phone</th>
-                    <th className="p-5 font-semibold text-gray-400">Reg. Fee</th>
-                    <th className="p-5 font-semibold text-gray-400">Monthly</th>
-                    <th className="p-5 font-semibold text-gray-400">Joint Date</th>
-                    <th className="p-5 font-semibold text-gray-400">Status</th>
-                    <th className="p-5 font-semibold text-gray-400">Next Due</th>
-                    <th className="p-5 font-semibold text-gray-400">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {admissions.filter(r => r.plan !== 'Renewal').map(r => {
-                    const joinedDate = r.date_joined ? new Date(r.date_joined) : null;
-                    const lastPaymentDate = r.last_payment_date ? new Date(r.last_payment_date) : null;
-                    const today = new Date();
-                    let status = { text: 'N/A', class: 'bg-gray-500/10 text-gray-500' };
-                    let nextDue = 'N/A';
-                    if (joinedDate) {
-                      const day = joinedDate.getDate();
-                      const currentMonth = today.getMonth();
-                      const currentYear = today.getFullYear();
-                      const isPaidThisMonth = lastPaymentDate && lastPaymentDate.getMonth() === today.getMonth() && lastPaymentDate.getFullYear() === today.getFullYear();
-                      let dueThisMonth = new Date(currentYear, currentMonth, day);
-                      if (isPaidThisMonth) {
-                        status = { text: 'PAID', class: 'bg-green-500/20 text-green-500 border border-green-500/30' };
-                        nextDue = new Date(currentYear, currentMonth + 1, day).toLocaleDateString();
-                      } else if (today > dueThisMonth) {
-                        status = { text: 'OVERDUE', class: 'bg-red-500/20 text-red-500 border border-red-500/30' };
-                        nextDue = dueThisMonth.toLocaleDateString();
-                      } else {
-                        status = { text: 'UP TO DATE', class: 'bg-blue-500/20 text-blue-500 border border-blue-500/30' };
-                        nextDue = dueThisMonth.toLocaleDateString();
-                      }
-                    }
-                    return (
-                      <tr key={r.id} className="border-b border-white/5 hover:bg-white/5 group">
-                        <td className="p-5">
-                          {r.profile_pic ? <img src={r.profile_pic?.startsWith('res.cloudinary.com') ? `https://${r.profile_pic}` : r.profile_pic} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-primary" /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xs text-gray-500">No Pic</div>}
-                        </td>
-                        <td className="p-5 font-bold">{r.name}</td>
-                        <td className="p-5 text-gray-400">{r.phone}</td>
-                        <td className="p-5 text-primary italic font-bold">₹800</td>
-                        <td className="p-5 text-primary italic font-bold">₹300</td>
-                        <td className="p-5 text-gray-500 text-sm">{r.date_joined ? new Date(r.date_joined).toLocaleDateString() : 'N/A'}</td>
-                        <td className="p-5"><span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${status.class}`}>{status.text}</span></td>
-                        <td className="p-5 text-sm font-semibold text-gray-300">{nextDue}</td>
-                        <td className="p-5">
-                          <div className="flex flex-col gap-2">
-                            <button onClick={() => handleMarkAsPaid(r.id)} className="px-4 py-2 bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg hover:bg-blue-600 hover:text-white transition-all text-xs font-bold">✅ Mark as Paid</button>
-                            {r.phone ? (
-                              <a href={`https://wa.me/${(() => { const num = r.phone?.replace(/[^0-9]/g, ''); return num?.startsWith('91') ? num : `91${num}`; })()}?text=Hello%20${encodeURIComponent(r.name)},%20this%20is%20a%20friendly%20reminder%20from%20*Hercules%20GYM%20PALA*.%20Your%20monthly%20gym%20fee%20of%20*₹300*%20is%20currently%20*pending*%20(Due:%20${nextDue}).%20Please%20clear%20it%20at%20your%20earliest%20convenience%20via%20Cash%20or%20our%20UPI:%20*Q669733104@ybl*.%20Thank%20you!`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600/20 text-green-500 border border-green-500/30 rounded-lg hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                                <span>Reminder</span>
-                              </a>
-                            ) : (
-                              <span className="text-[10px] text-gray-500 italic">No phone listed</span>
-                            )}
-                            <button onClick={() => openEditModal(r)} className="px-4 py-2 bg-yellow-600/20 text-yellow-500 border border-yellow-500/30 rounded-lg hover:bg-yellow-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold">✏️ Edit</button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        {(adminView === 'all_members' || adminView === 'new_admissions' || adminView === 'renewals') && (
+          <div className="animate-fade-in">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+              <div>
+                <h2 className="text-3xl font-bold text-white mb-1">
+                  {adminView === 'all_members' && 'All Gym Members'}
+                  {adminView === 'new_admissions' && 'New Admitted Users'}
+                  {adminView === 'renewals' && 'Renewal Records'}
+                </h2>
+                <p className="text-gray-400">
+                  {adminView === 'all_members' && `Total Database: ${admissions.length} Members (Old & New)`}
+                  {adminView === 'new_admissions' && `${admissions.filter(r => r.plan !== 'Renewal').length} Recent Admissions Found`}
+                  {adminView === 'renewals' && `${admissions.filter(r => r.plan === 'Renewal').length} Monthly Renewal Entries`}
+                </p>
+              </div>
 
-        {adminView === 'renewals' && (
-          <div>
-            <h2 className="text-3xl font-bold mb-6">Monthly Fee Data</h2>
+              <div className="flex gap-2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by name or phone..."
+                    className="bg-black/20 border border-white/10 rounded-full px-5 py-3 text-sm focus:border-primary outline-none min-w-[250px] transition-all"
+                    onChange={(e) => {
+                      const val = e.target.value.toLowerCase();
+                      const rows = document.querySelectorAll('.member-row');
+                      rows.forEach(row => {
+                        const name = row.querySelector('.member-name')?.textContent.toLowerCase() || '';
+                        const phone = row.querySelector('.member-phone')?.textContent.toLowerCase() || '';
+                        row.style.display = (name.includes(val) || phone.includes(val)) ? '' : 'none';
+                      });
+                    }}
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-card rounded-2xl overflow-x-auto border border-white/10 shadow-2xl custom-scrollbar">
               <table className="w-full text-left min-w-[900px]">
-                <thead className="bg-black/40">
+                <thead className="bg-black/40 border-b border-white/5">
                   <tr>
-                    <th className="p-5 font-semibold text-gray-400">Photo</th>
-                    <th className="p-5 font-semibold text-gray-400">Name</th>
-                    <th className="p-5 font-semibold text-gray-400">Phone</th>
-                    <th className="p-5 font-semibold text-gray-400">Monthly</th>
-                    <th className="p-5 font-semibold text-gray-400">Payment Date</th>
+                    <th className="p-5 font-semibold text-gray-400">Member</th>
+                    <th className="p-5 font-semibold text-gray-400">Contact</th>
+                    <th className="p-5 font-semibold text-gray-400">Reg. Details</th>
+                    <th className="p-5 font-semibold text-gray-400">Fees</th>
+                    <th className="p-5 font-semibold text-gray-400">Join Date</th>
+                    <th className="p-5 font-semibold text-gray-400">Status</th>
                     <th className="p-5 font-semibold text-gray-400">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {admissions.filter(r => r.plan === 'Renewal').map(r => {
-                    const joinedDate = r.date_joined ? new Date(r.date_joined).toLocaleDateString() : 'N/A';
-                    return (
-                      <tr key={r.id} className="border-b border-white/5 hover:bg-white/5 group">
-                        <td className="p-5">
-                          {r.profile_pic ? <img src={r.profile_pic?.startsWith('res.cloudinary.com') ? `https://${r.profile_pic}` : r.profile_pic} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-primary" /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xs text-gray-500">No Pic</div>}
-                        </td>
-                        <td className="p-5 font-bold">{r.name}</td>
-                        <td className="p-5 text-gray-400">{r.phone}</td>
-                        <td className="p-5 text-primary italic font-bold">₹300</td>
-                        <td className="p-5 text-gray-500 text-sm">{joinedDate}</td>
-                        <td className="p-5">
-                          <div className="flex flex-col gap-2">
-                            <button onClick={() => openEditModal(r)} className="px-4 py-2 bg-yellow-600/20 text-yellow-500 border border-yellow-500/30 rounded-lg hover:bg-yellow-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold">✏️ Edit</button>
-                            <a href={`https://wa.me/${(() => { const num = r.phone?.replace(/[^0-9]/g, ''); return num?.startsWith('91') ? num : `91${num}`; })()}?text=Hello%20${encodeURIComponent(r.name)},%20this%20is%20a%20friendly%20thank%20you%20giving%20us%20your%20monthly%20fee!`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600/20 text-green-500 border border-green-500/30 rounded-lg hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg><span>Thank You</span></a>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                <tbody className="divide-y divide-white/5">
+                  {admissions
+                    .filter(r => {
+                      if (adminView === 'new_admissions') return r.plan !== 'Renewal';
+                      if (adminView === 'renewals') return r.plan === 'Renewal';
+                      return true; // all_members
+                    })
+                    .map(r => {
+                      const joinedDate = r.date_joined ? new Date(r.date_joined) : null;
+                      const lastPaymentDate = r.last_payment_date ? new Date(r.last_payment_date) : null;
+                      const today = new Date();
+                      let status = { text: 'N/A', class: 'bg-gray-500/10 text-gray-500' };
+                      let nextDue = 'N/A';
+
+                      if (joinedDate) {
+                        const day = joinedDate.getDate();
+                        const currentMonth = today.getMonth();
+                        const currentYear = today.getFullYear();
+                        const isPaidThisMonth = lastPaymentDate && lastPaymentDate.getMonth() === today.getMonth() && lastPaymentDate.getFullYear() === today.getFullYear();
+                        let dueThisMonth = new Date(currentYear, currentMonth, day);
+
+                        if (isPaidThisMonth) {
+                          status = { text: 'PAID', class: 'bg-green-500/20 text-green-500 border border-green-500/30' };
+                          nextDue = new Date(currentYear, currentMonth + 1, day).toLocaleDateString();
+                        } else if (today > dueThisMonth) {
+                          status = { text: 'OVERDUE', class: 'bg-red-500/20 text-red-500 border border-red-500/30' };
+                          nextDue = dueThisMonth.toLocaleDateString();
+                        } else {
+                          status = { text: 'ACTIVE', class: 'bg-blue-500/20 text-blue-500 border border-blue-500/30' };
+                          nextDue = dueThisMonth.toLocaleDateString();
+                        }
+                      }
+
+                      return (
+                        <tr key={r.id} className="hover:bg-white/5 transition-colors member-row">
+                          <td className="p-5">
+                            <div className="flex items-center gap-4">
+                              {r.profile_pic ? (
+                                <img src={r.profile_pic?.startsWith('res.cloudinary.com') ? `https://${r.profile_pic}` : r.profile_pic} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-primary/20" />
+                              ) : (
+                                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl text-gray-500 border border-white/10">👤</div>
+                              )}
+                              <div>
+                                <p className="font-bold text-white member-name">{r.name}</p>
+                                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">{r.plan || 'Regular'}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-5">
+                            <p className="text-gray-300 font-medium member-phone">{r.phone}</p>
+                            <p className="text-[10px] text-gray-500 italic">Verified ID: {r.id}</p>
+                          </td>
+                          <td className="p-5">
+                            <p className="text-xs text-gray-400">Reg: <span className="text-primary font-bold">₹800</span></p>
+                            <p className="text-xs text-gray-400">Monthly: <span className="text-primary font-bold">₹300</span></p>
+                          </td>
+                          <td className="p-5">
+                            <div className="flex flex-col">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block w-fit ${status.class}`}>{status.text}</span>
+                              <span className="text-[11px] text-gray-500 mt-1">Due: {nextDue}</span>
+                            </div>
+                          </td>
+                          <td className="p-5">
+                            <p className="text-sm text-gray-400">{r.date_joined ? new Date(r.date_joined).toLocaleDateString('en-GB') : 'N/A'}</p>
+                            <p className="text-[10px] text-gray-500">Member Since</p>
+                          </td>
+                          <td className="p-5">
+                            <span className={`w-3 h-3 rounded-full inline-block ${status.text === 'PAID' ? 'bg-green-500' : status.text === 'OVERDUE' ? 'bg-red-500' : 'bg-blue-500'} animate-pulse`}></span>
+                          </td>
+                          <td className="p-5">
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => handleMarkAsPaid(r.id)} className="p-2 bg-green-500/10 text-green-500 rounded-lg hover:bg-green-500 hover:text-white transition-all shadow-sm" title="Mark Paid">✅</button>
+                              <button onClick={() => openEditModal(r)} className="p-2 bg-yellow-500/10 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition-all shadow-sm" title="Edit">✏️</button>
+                              {r.phone && (
+                                <a href={`https://wa.me/${(() => { const num = r.phone?.replace(/[^0-9]/g, ''); return num?.startsWith('91') ? num : `91${num}`; })()}?text=Hello%20${encodeURIComponent(r.name)},%20this%20is%20*Hercules%20GYM%20PALA*.%20Your%20monthly%20gym%20fee%20of%20*₹300*%20is%20pending.%20Please%20clear%20it!`} target="_blank" rel="noopener noreferrer" className="p-2 bg-green-600/10 text-green-500 rounded-lg hover:bg-green-600 hover:text-white transition-all shadow-sm" title="WhatsApp Reminder">📱</a>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  {admissions.length === 0 && (
+                    <tr>
+                      <td colSpan="7" className="p-20 text-center text-gray-500">
+                        <span className="text-4xl block mb-4">📂</span>
+                        No member records found.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -469,13 +527,13 @@ export default function Admin({ setCurrentPage }) {
                     const lastPaymentDate = r.last_payment_date ? new Date(r.last_payment_date) : null;
                     const today = new Date();
                     let nextDue = 'N/A';
-                    
+
                     if (joinedDate) {
                       const day = joinedDate.getDate();
                       let dueThisMonth = new Date(today.getFullYear(), today.getMonth(), day);
                       nextDue = dueThisMonth.toLocaleDateString();
                     }
-                    
+
                     return (
                       <tr key={r.id} className="border-b border-white/5 hover:bg-white/5 group">
                         <td className="p-5">
@@ -487,8 +545,8 @@ export default function Admin({ setCurrentPage }) {
                         <td className="p-5"><span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/20 text-red-500 border border-red-500/30">OVERDUE (Due: {nextDue})</span></td>
                         <td className="p-5">
                           <div className="flex flex-col gap-2">
-                             <button onClick={() => handleMarkAsPaid(r.id)} className="px-4 py-2 bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg hover:bg-blue-600 hover:text-white transition-all text-xs font-bold">✅ Mark as Paid</button>
-                             <a href={`https://wa.me/${(() => { const num = r.phone?.replace(/[^0-9]/g, ''); return num?.startsWith('91') ? num : `91${num}`; })()}?text=Hello%20${encodeURIComponent(r.name)},%20this%20is%20a%20friendly%20reminder%20from%20*Hercules%20GYM%20PALA*.%20Your%20monthly%20gym%20fee%20of%20*₹300*%20is%20currently%20*pending*%20(Due:%20${nextDue}).%20Please%20clear%20it%20at%20your%20earliest%20convenience%20via%20Cash%20or%20our%20UPI:%20*Q669733104@ybl*.%20Thank%20you!`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600/20 text-green-500 border border-green-500/30 rounded-lg hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg><span>Send Reminder</span></a>
+                            <button onClick={() => handleMarkAsPaid(r.id)} className="px-4 py-2 bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg hover:bg-blue-600 hover:text-white transition-all text-xs font-bold">✅ Mark as Paid</button>
+                            <a href={`https://wa.me/${(() => { const num = r.phone?.replace(/[^0-9]/g, ''); return num?.startsWith('91') ? num : `91${num}`; })()}?text=Hello%20${encodeURIComponent(r.name)},%20this%20is%20a%20friendly%20reminder%20from%20*Hercules%20GYM%20PALA*.%20Your%20monthly%20gym%20fee%20of%20*₹300*%20is%20currently%20*pending*%20(Due:%20${nextDue}).%20Please%20clear%20it%20at%20your%20earliest%20convenience%20via%20Cash%20or%20our%20UPI:%20*Q669733104@ybl*.%20Thank%20you!`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600/20 text-green-500 border border-green-500/30 rounded-lg hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" /></svg><span>Send Reminder</span></a>
                           </div>
                         </td>
                       </tr>
