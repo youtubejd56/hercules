@@ -41,6 +41,7 @@ export default function Admin({ setCurrentPage }) {
 
   const [editingMember, setEditingMember] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', phone: '', joinDate: '', photo: null });
+  const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'az', 'za'
 
   React.useEffect(() => {
     if (isLogged) {
@@ -362,7 +363,20 @@ export default function Admin({ setCurrentPage }) {
                 </p>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <div className="relative">
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    className="bg-black/20 border border-white/10 rounded-full px-5 py-3 text-sm focus:border-primary outline-none text-gray-600 transition-all cursor-pointer appearance-none pr-10"
+                  >
+                    <option value="newest">Latest First</option>
+                    <option value="az">Name (A-Z)</option>
+                    <option value="za">Name (Z-A)</option>
+                  </select>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-700">↕️</span>
+                </div>
+
                 <div className="relative">
                   <input
                     type="text"
@@ -401,7 +415,13 @@ export default function Admin({ setCurrentPage }) {
                     .filter(r => {
                       if (adminView === 'new_admissions') return r.plan !== 'Renewal';
                       if (adminView === 'renewals') return r.plan === 'Renewal';
-                      return true; // all_members
+                      return true;
+                    })
+                    .sort((a, b) => {
+                      if (sortOrder === 'az') return (a.name || '').localeCompare(b.name || '');
+                      if (sortOrder === 'za') return (b.name || '').localeCompare(a.name || '');
+                      if (sortOrder === 'newest') return (b.id - a.id);
+                      return 0;
                     })
                     .map(r => {
                       const joinedDate = r.date_joined ? new Date(r.date_joined) : null;
