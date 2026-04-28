@@ -11,6 +11,7 @@ export default function Admission() {
   });
   const [isPendingPayment, setIsPendingPayment] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const handleInitialSubmit = (e) => {
     e.preventDefault();
@@ -32,7 +33,6 @@ export default function Admission() {
     if (formData.feeType === 'registration' && formData.photo) data.append('profile_pic', formData.photo);
     data.append('plan', formData.feeType === 'registration' ? 'New Member' : 'Renewal');
     
-    // Use the selected join date!
     data.append('date_joined', formData.joinDate);
     data.append('last_payment_date', formData.joinDate);
 
@@ -42,17 +42,29 @@ export default function Admission() {
         body: data,
       });
       if (response.ok) {
-        alert(`Registration successful! Your data has been stored and is awaiting admin approval.`);
+        alert(`Registration successful! Your data has been stored. Admin will verify your payment shortly.`);
         setIsPendingPayment(false);
-        setFormData({ name: '', phone: '', photo: null, feeType: 'registration' });
+        setIsVerifying(false);
+        setFormData({ name: '', phone: '', photo: null, feeType: 'registration', joinDate: new Date().toISOString().split('T')[0] });
       } else {
         const errorData = await response.json().catch(() => ({}));
         alert(`Failed to register: ${errorData.error || response.statusText}`);
+        setIsVerifying(false);
       }
     } catch (error) {
       alert('Network error. Is the server running?');
+      setIsVerifying(false);
     }
     setIsSaving(false);
+  };
+
+  const handleAutoVerify = () => {
+    setIsVerifying(true);
+    // Wait for 5 seconds (time for user to switch back from UPI app)
+    // then automatically submit
+    setTimeout(() => {
+      finalSubmit();
+    }, 5000);
   };
 
   if (isPendingPayment) {
@@ -62,29 +74,45 @@ export default function Admission() {
     
     return (
       <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-8 animate-fade-in-up">
-        <div className="bg-card p-8 md:p-12 rounded-2xl w-full max-w-md border border-white/5 shadow-[0_20px_40px_rgba(0,0,0,0.4)] text-center relative overflow-hidden">
+        <div className="bg-card p-8 md:p-12 rounded-2xl w-full max-md border border-white/5 shadow-[0_20px_40px_rgba(0,0,0,0.4)] text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-red-500 to-primary"></div>
-          <div className="w-20 h-20 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-2">Payment Pending</h2>
-          <p className="text-gray-400 mb-8">Please complete your payment of <span className="font-bold text-white text-lg">₹{amount}</span> to submit your admission.</p>
           
-          <div className="bg-white p-3 rounded-2xl mx-auto w-48 h-48 mb-6 shadow-xl shadow-black/50 hover:scale-105 transition-transform">
-            <img src={qrUrl} alt="UPI QR Code" className="w-full h-full object-contain" />
-          </div>
-          
-          <p className="text-gray-400 mb-1 text-sm">Or pay using UPI ID:</p>
-          <p className="text-xl font-bold text-white tracking-widest mb-8 bg-white/5 py-2 rounded-lg border border-white/10">Q669733104@ybl</p>
+          {isVerifying ? (
+            <div className="py-12 flex flex-col items-center">
+              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
+              <h2 className="text-2xl font-bold text-white mb-2">Verifying Payment...</h2>
+              <p className="text-gray-400">Please do not close the app. We are processing your admission.</p>
+            </div>
+          ) : (
+            <>
+              <div className="w-20 h-20 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-2">Pending</h2>
+              <p className="text-gray-400 mb-8">Please complete your payment of <span className="font-bold text-white text-lg">₹{amount}</span> to submit your admission.</p>
+              
+              <div className="bg-white p-3 rounded-2xl mx-auto w-48 h-48 mb-6 shadow-xl shadow-black/50 hover:scale-105 transition-transform">
+                <img src={qrUrl} alt="UPI QR Code" className="w-full h-full object-contain" />
+              </div>
+              
+              <p className="text-gray-400 mb-1 text-sm">Or pay using UPI ID:</p>
+              <p className="text-xl font-bold text-white tracking-widest mb-8 bg-white/5 py-2 rounded-lg border border-white/10">Q669733104@ybl</p>
 
-          <a href={upiLink} className="md:hidden w-full py-4 bg-primary text-white text-lg font-bold rounded-lg hover:bg-red-600 shadow-[0_4px_12px_rgba(255,62,62,0.4)] transition-all flex items-center justify-center gap-2 mb-4">
-            💳 Pay via UPI App
-          </a>
-          <p className="hidden md:block text-gray-500 text-sm mb-4">Note: Scan the QR code with your mobile UPI App (GPay/PhonePe).</p>
+              <a 
+                href={upiLink} 
+                onClick={handleAutoVerify}
+                className="md:hidden w-full py-4 bg-primary text-white text-lg font-bold rounded-lg hover:bg-red-600 shadow-[0_4px_12px_rgba(255,62,62,0.4)] transition-all flex items-center justify-center gap-2 mb-4"
+              >
+                💳 Pay via UPI App
+              </a>
+              
+              <p className="hidden md:block text-gray-500 text-sm mb-4">Note: Scan the QR code with your mobile UPI App (GPay/PhonePe).</p>
 
-          <button onClick={finalSubmit} disabled={isSaving} className="w-full py-4 bg-transparent border border-white/10 text-white font-bold rounded-lg hover:bg-white/5 transition-all">
-            {isSaving ? 'Submitting...' : 'I Have Paid (Finish)'}
-          </button>
+              <button onClick={finalSubmit} disabled={isSaving} className="w-full py-4 bg-transparent border border-white/10 text-white font-bold rounded-lg hover:bg-white/5 transition-all">
+                {isSaving ? 'Submitting...' : 'I Have Paid (Finish)'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     );
@@ -112,7 +140,6 @@ export default function Admission() {
               />
             </div>
           )}
-
 
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">Phone Number</label>

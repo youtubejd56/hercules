@@ -51,6 +51,14 @@ export default function Header({ currentPage, setCurrentPage, authUser, onLogout
         >
           Admin
         </button>
+        <a 
+          href="/HerculesGym-debug.apk" 
+          download="HerculesGym.apk"
+          className="ml-4 px-5 py-2 bg-gradient-to-r from-green-500 to-green-700 rounded-lg font-bold text-xs uppercase tracking-wide text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(34,197,94,0.4)] flex items-center gap-2 border border-green-400/50"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          Get App
+        </a>
 
         {/* Auth Controls */}
         {authUser ? (
@@ -135,8 +143,17 @@ export default function Header({ currentPage, setCurrentPage, authUser, onLogout
               🔐 Admin Dashboard
             </button>
 
+            <a 
+              href="/HerculesGym-debug.apk" 
+              download="HerculesGym.apk"
+              className="flex items-center justify-center gap-3 w-full py-4 mt-2 bg-gradient-to-r from-green-600 to-green-800 text-white rounded-xl font-bold text-lg hover:from-green-500 hover:to-green-700 transition-all border border-green-400/30 shadow-[0_4px_15px_rgba(34,197,94,0.3)]"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              Download Android App
+            </a>
+
             {authUser ? (
-              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5 mt-2">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
                     {authUser.username?.[0]?.toUpperCase()}
