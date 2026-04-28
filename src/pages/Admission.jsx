@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { API_URLS } from '../apiConfig';
 
 export default function Admission() {
@@ -12,6 +12,37 @@ export default function Admission() {
   const [isPendingPayment, setIsPendingPayment] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [lookupName, setLookupName] = useState('');
+  const [isLookingUp, setIsLookingUp] = useState(false);
+
+  useEffect(() => {
+    const fetchMemberName = async () => {
+      if (formData.phone.length === 10 && formData.feeType === 'monthly') {
+        setIsLookingUp(true);
+        try {
+          const res = await fetch(API_URLS.admissions);
+          if (res.ok) {
+            const members = await res.json();
+            const member = members.find(m => m.phone === formData.phone);
+            if (member) {
+              setLookupName(member.name);
+            } else {
+              setLookupName('Member Not Found');
+            }
+          }
+        } catch (err) {
+          console.error("Lookup failed", err);
+        } finally {
+          setIsLookingUp(false);
+        }
+      } else {
+        setLookupName('');
+      }
+    };
+
+    const timer = setTimeout(fetchMemberName, 500);
+    return () => clearTimeout(timer);
+  }, [formData.phone, formData.feeType]);
 
   const handleInitialSubmit = (e) => {
     e.preventDefault();
@@ -98,13 +129,21 @@ export default function Admission() {
               <p className="text-gray-400 mb-1 text-sm">Or pay using UPI ID:</p>
               <p className="text-xl font-bold text-white tracking-widest mb-8 bg-white/5 py-2 rounded-lg border border-white/10">Q669733104@ybl</p>
 
-              <a 
-                href={upiLink} 
-                onClick={handleAutoVerify}
+              <button 
+                onClick={() => {
+                  handleAutoVerify();
+                  window.location.href = upiLink;
+                  // If we are still here after a short delay, it might have failed to launch
+                  setTimeout(() => {
+                    if (document.visibilityState === 'visible') {
+                      alert("Could not open UPI app. Please ensure you have GPay, PhonePe, or Paytm installed, or use the QR code / UPI ID manually.");
+                    }
+                  }, 2000);
+                }}
                 className="md:hidden w-full py-4 bg-primary text-white text-lg font-bold rounded-lg hover:bg-red-600 shadow-[0_4px_12px_rgba(255,62,62,0.4)] transition-all flex items-center justify-center gap-2 mb-4"
               >
                 💳 Pay via UPI App
-              </a>
+              </button>
               
               <p className="hidden md:block text-gray-500 text-sm mb-4">Note: Scan the QR code with your mobile UPI App (GPay/PhonePe).</p>
 
@@ -146,11 +185,17 @@ export default function Admission() {
             <input
               type="tel"
               className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans"
-              placeholder="(555) 123-4567"
+              placeholder="10 Digit Mobile Number"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
               required
             />
+            {isLookingUp && <p className="text-xs text-primary animate-pulse mt-1">AI Lookup: Searching Member...</p>}
+            {lookupName && (
+              <p className={`text-sm mt-2 font-bold ${lookupName === 'Member Not Found' ? 'text-yellow-500' : 'text-green-400'}`}>
+                {lookupName === 'Member Not Found' ? '⚠️ Member not found. Please register first.' : `✅ Welcome back, ${lookupName}!`}
+              </p>
+            )}
           </div>
 
           {formData.feeType === 'registration' && (
